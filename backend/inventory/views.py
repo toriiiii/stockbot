@@ -1,41 +1,35 @@
 from rest_framework import generics, permissions
 from .models import Item
 from .serializers import ItemSerializer
-
 from django.contrib.auth import get_user_model
 
-##### User Views #####
+### ALL ENDPOINTS ARE PUBLIC DURING DEVELOPMENT
 
-## Temp public for testing
+User = get_user_model()
 class ItemListCreateView(generics.ListCreateAPIView):
-    """Public can list items, authenticated users can create items"""
+    """Public GET + POST for dev/testing"""
     serializer_class = ItemSerializer
-
-    def get_permissions(self):
-        if self.request.method == "GET":
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        # Public GET returns all items (or adjust if desired)
         return Item.objects.all()
 
     def perform_create(self, serializer):
+        # Hardcode item owner to first user in the DB
         first_user = User.objects.order_by('id').first()
         serializer.save(user=first_user)
 
 
 class ItemDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """User can modify their inventory items"""
+    """Public GET, PUT, PATCH, DELETE for dev/testing"""
     serializer_class = ItemSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        # Prevent users from accessing or editing others' items
-        return Item.objects.filter(user=self.request.user)
+        # Allow access to ALL items (dev mode only)
+        return Item.objects.all()
 
     def perform_update(self, serializer):
-        # Ensure user cannot change ownership
-        serializer.save(user=self.request.user)
-
-##### AI Server Views #####
+        # Hardcode owner so user cannot be changed
+        first_user = User.objects.order_by('id').first()
+        serializer.save(user=first_user)
