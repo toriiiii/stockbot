@@ -15,6 +15,7 @@ git clone https://github.com/toriiiii/stockbot.git
 2. Create virtual env inside the repo
 ```
 python -m venv venv
+venv/Scripts/activate
 ```
 
 3. Install dependencies in requirements.txt
