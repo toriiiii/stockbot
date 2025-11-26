@@ -1,0 +1,18 @@
+# Virtual environment
+venv/
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.log
+
+# SQLite database (local only)
+db.sqlite3
+
+# Environment / secrets
+.env
+
+# OS or IDE files
+.DS_Store
+.vscode/
+.idea/
