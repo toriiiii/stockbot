@@ -2,7 +2,7 @@
 venv/
 
 # Byte-compiled / cache files
-__pycache__/
+**/__pycache__/
 *.py[cod]
 *.log
 

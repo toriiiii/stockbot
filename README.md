@@ -9,4 +9,24 @@ StockBot enables users to check their kitchen inventory from anywhere via a mobi
 # Tools
 - Django REST Framework
 - React Native
-- Android Studio
+- Expo Go
+- Render
+- PostgreSQL
+
+# Run StockBot Locally
+
+1. cd into the backend directory. Follow the steps in ./backend/README to set up your local backend environment. Keep your virtual environment activated.
+
+2. Create a second command prompt terminal and cd into the frontend directory. Follow the steps in ./frontend/stockbot-frontend/README to set up your local frontend environment. Keep your virtual environment activated.
+
+3. In your backend terminal, run the Django server and make it accessible outside of localhost
+
+```
+python manage.py runserver 0.0.0.0:8000
+```
+
+4. In your frontend terminal, run the React Native application and open it on Expo Go.
+
+```
+npx expo start -c
+```
