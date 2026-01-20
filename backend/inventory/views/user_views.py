@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions
-from .models import Item
-from .serializers import ItemSerializer
+from ..models import Item
+from ..serializers import ItemSerializer
 from django.contrib.auth import get_user_model
 
 ### ALL ENDPOINTS ARE PUBLIC DURING DEVELOPMENT
@@ -12,10 +12,11 @@ class ItemListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
+        #TO DO: Limit objects to authorized user
         return Item.objects.all()
 
     def perform_create(self, serializer):
-        # Hardcode item owner to first user in the DB
+        #TO DO: Get user by auth
         first_user = User.objects.order_by('id').first()
         serializer.save(user=first_user)
 
@@ -26,10 +27,10 @@ class ItemDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        # Allow access to ALL items (dev mode only)
+        #TO DO: Limit objects to authorized user
         return Item.objects.all()
 
     def perform_update(self, serializer):
-        # Hardcode owner so user cannot be changed
+        #TO DO: Get user by auth
         first_user = User.objects.order_by('id').first()
         serializer.save(user=first_user)
