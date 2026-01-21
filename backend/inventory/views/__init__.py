@@ -1,2 +1,2 @@
 from .user_views import *
-from .server_views import *
+from .sensor_views import *
