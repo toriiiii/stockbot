@@ -1,61 +1,195 @@
 from django.urls import reverse
-from rest_framework import status
 from rest_framework.test import APITestCase
-from django.contrib.auth import get_user_model
-from .models import Item
+from rest_framework import status
 
-User = get_user_model()
+from accounts.models import StockBotUser
+from inventory.models import SensorIngestionEvent, Item
 
-class ServerEndpointTests(APITestCase):
+class IngestionBaseTest(APITestCase):
+    """
+    Base class that sets up a user and common helpers.
+    """
+
     def setUp(self):
-        # Create a StockBotUser with botID 0
-        self.user = User.objects.create_user(
-            username="bot_user",
-            password="testpass123",
-            botID=0
+        self.user = StockBotUser.objects.create_user(
+            username="testbot",
+            password="password",
+            botID=123,
         )
-        self.url = reverse("server-add") 
 
-    def test_create_item_success(self):
-        """
-        Ensure the server endpoint creates an Item successfully.
-        """
-        payload = {
-            "botID": 0,
-            "name": "Zucchini",
-            "weight": 550.25
-        }
-        response = self.client.post(self.url, payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.camera_url = "/api/inventory/ingestion/camera/"
+        self.classification_url = "/api/inventory/ingestion/classification/"
+        self.weight_url = "/api/inventory/ingestion/fsr/"
 
-        # Verify item is created in database
-        item = Item.objects.get(name="Zucchini")
-        self.assertEqual(item.user, self.user)
-        self.assertEqual(item.initial_grams, 550.25)
-        self.assertEqual(item.current_grams, 550.25)
 
-    def test_invalid_botID(self):
+class CameraIngestionTests(IngestionBaseTest):
+    def test_camera_creates_event(self):
+        response = self.client.post(
+            self.camera_url,
+            {
+                "bot_id": 123,
+                "image_id": "img-1",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertEqual(SensorIngestionEvent.objects.count(), 1)
+        self.assertEqual(Item.objects.count(), 0)
+
+    def test_camera_is_idempotent(self):
+        self.client.post(
+            self.camera_url,
+            {"bot_id": 123, "image_id": "img-1"},
+            format="json",
+        )
+
+        self.client.post(
+            self.camera_url,
+            {"bot_id": 123, "image_id": "img-1"},
+            format="json",
+        )
+
+        self.assertEqual(SensorIngestionEvent.objects.count(), 1)
+
+
+class ClassificationIngestionTests(IngestionBaseTest):
+    def test_classification_creates_event(self):
+        response = self.client.post(
+            self.classification_url,
+            {
+                "bot_id": 123,
+                "image_id": "img-2",
+                "classification": "milk",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertEqual(SensorIngestionEvent.objects.count(), 1)
+        self.assertEqual(Item.objects.count(), 0)
+
+    def test_classification_updates_existing_event(self):
+        SensorIngestionEvent.objects.create(
+            user=self.user,
+            image_id="img-2",
+        )
+
+        response = self.client.post(
+            self.classification_url,
+            {
+                "bot_id": 123,
+                "image_id": "img-2",
+                "classification": "eggs",
+            },
+            format="json",
+        )
+
+        event = SensorIngestionEvent.objects.get()
+        self.assertEqual(event.classification, "eggs")
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+
+class WeightIngestionTests(IngestionBaseTest):
+    def test_weight_creates_event(self):
+        response = self.client.post(
+            self.weight_url,
+            {
+                "bot_id": 123,
+                "image_id": "img-3",
+                "weight_grams": 500,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertEqual(SensorIngestionEvent.objects.count(), 1)
+        self.assertEqual(Item.objects.count(), 0)
+
+
+class ResolutionTests(IngestionBaseTest):
+    def test_event_resolves_when_all_data_present(self):
         """
-        Returns 400 if the botID does not exist.
+        Classification + weight (order should not matter)
         """
-        payload = {
-            "botID": 999,
-            "name": "Tomato",
-            "weight": 200.0
-        }
-        response = self.client.post(self.url, payload, format='json')
+        self.client.post(
+            self.classification_url,
+            {
+                "bot_id": 123,
+                "image_id": "img-4",
+                "classification": "cheese",
+            },
+            format="json",
+        )
+
+        self.client.post(
+            self.weight_url,
+            {
+                "bot_id": 123,
+                "image_id": "img-4",
+                "weight_grams": 250,
+            },
+            format="json",
+        )
+
+        self.assertEqual(SensorIngestionEvent.objects.count(), 0)
+        self.assertEqual(Item.objects.count(), 1)
+
+        item = Item.objects.get()
+        self.assertEqual(item.name, "cheese")
+        self.assertEqual(item.initial_grams, 250)
+        self.assertEqual(item.current_grams, 250)
+
+    def test_resolution_is_order_independent(self):
+        """
+        Weight first, then classification
+        """
+        self.client.post(
+            self.weight_url,
+            {
+                "bot_id": 123,
+                "image_id": "img-5",
+                "weight_grams": 1000,
+            },
+            format="json",
+        )
+
+        self.client.post(
+            self.classification_url,
+            {
+                "bot_id": 123,
+                "image_id": "img-5",
+                "classification": "yogurt",
+            },
+            format="json",
+        )
+
+        self.assertEqual(SensorIngestionEvent.objects.count(), 0)
+        self.assertEqual(Item.objects.count(), 1)
+
+
+class ErrorHandlingTests(IngestionBaseTest):
+    def test_invalid_bot_id_rejected(self):
+        response = self.client.post(
+            self.weight_url,
+            {
+                "bot_id": 999,
+                "image_id": "img-6",
+                "weight_grams": 100,
+            },
+            format="json",
+        )
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("botID", response.data)
 
-    def test_missing_fields(self):
-        """
-        Returns 400 if required fields are missing.
-        """
-        payload = {
-            "botID": 0
-            # name and weight missing
-        }
-        response = self.client.post(self.url, payload, format='json')
+    def test_missing_fields_rejected(self):
+        response = self.client.post(
+            self.weight_url,
+            {
+                "bot_id": 123,
+                "image_id": "img-7",
+            },
+            format="json",
+        )
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("name", response.data)
-        self.assertIn("weight", response.data)
