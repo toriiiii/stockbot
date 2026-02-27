@@ -7,8 +7,8 @@ const numColumns = 3;
 const blockSize = Dimensions.get("window").width / numColumns - 20;
 const circleSize = Dimensions.get("window").width / 2 - 20;
 const buttonWidth = Dimensions.get("window").width - 80;
-const LOCAL_IP = "100.66.223.32"; // replace with your laptop's IP
-const API_URL = `http://${LOCAL_IP}:8000/api/inventory/items/`;
+const API_BASE = "https://stockbot-api-yu48.onrender.com"; // stockbot api url
+const API_URL = `${API_BASE}/api/inventory/items/`; // endpoint for inventory operations
 
 const Stack = createNativeStackNavigator();
 
