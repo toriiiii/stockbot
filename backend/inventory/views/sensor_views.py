@@ -66,6 +66,7 @@ class ClassificationIngestionView(generics.CreateAPIView):
         )
 
         event.classification = data["classification"]
+        event.expires_at = data["expires_at"]
         event.save()
 
         resolved = try_resolve_event(event)
