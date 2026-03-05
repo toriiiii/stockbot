@@ -5,6 +5,7 @@ from rest_framework import status
 from accounts.models import StockBotUser
 from inventory.models import SensorIngestionEvent, Item
 
+
 class IngestionBaseTest(APITestCase):
     """
     Base class that sets up a user and common helpers.
@@ -61,6 +62,7 @@ class ClassificationIngestionTests(IngestionBaseTest):
                 "bot_id": 123,
                 "image_id": "img-2",
                 "classification": "milk",
+                "expires_at": None,
             },
             format="json",
         )
@@ -81,6 +83,7 @@ class ClassificationIngestionTests(IngestionBaseTest):
                 "bot_id": 123,
                 "image_id": "img-2",
                 "classification": "eggs",
+                "expires_at": None,
             },
             format="json",
         )
@@ -118,6 +121,7 @@ class ResolutionTests(IngestionBaseTest):
                 "bot_id": 123,
                 "image_id": "img-4",
                 "classification": "cheese",
+                "expires_at": None,
             },
             format="json",
         )
@@ -139,6 +143,7 @@ class ResolutionTests(IngestionBaseTest):
         self.assertEqual(item.name, "cheese")
         self.assertEqual(item.initial_grams, 250)
         self.assertEqual(item.current_grams, 250)
+        self.assertIsNone(item.expires_at)
 
     def test_resolution_is_order_independent(self):
         """
@@ -160,6 +165,7 @@ class ResolutionTests(IngestionBaseTest):
                 "bot_id": 123,
                 "image_id": "img-5",
                 "classification": "yogurt",
+                "expires_at": None,
             },
             format="json",
         )
