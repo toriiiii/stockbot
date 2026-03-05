@@ -25,12 +25,13 @@ class SensorIngestionEvent(models.Model):
         on_delete=models.CASCADE,
         related_name="sensor_ingestion_events"
     )
-    image_id = models.CharField(max_length=128, unique=True)
+    image_id = models.CharField(max_length=128)
 
     # Partial data (nullable)
     image = models.ImageField(upload_to="fridge_images/", null=True, blank=True)
     classification = models.CharField(max_length=100, null=True, blank=True)
     weight_grams = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    expires_at = models.DateField(null=True, blank=True)
 
     # Resolution
     created_at = models.DateTimeField(auto_now_add=True)

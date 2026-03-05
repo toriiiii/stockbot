@@ -1,5 +1,7 @@
 from inventory.models import Item
+from django.db import transaction
 
+@transaction.atomic
 def try_resolve_event(event):
     """
     If an ingestion event has all required data,
@@ -13,6 +15,7 @@ def try_resolve_event(event):
         name=event.classification,
         initial_grams=event.weight_grams,
         current_grams=event.weight_grams,
+        expires_at=event.expires_at,
     )
 
     event.delete()
