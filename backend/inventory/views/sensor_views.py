@@ -69,6 +69,7 @@ class ClassificationIngestionView(generics.CreateAPIView):
         event.expires_at = data["expires_at"]
         event.save()
 
+        event.refresh_from_db()
         resolved = try_resolve_event(event)
 
         return Response(
@@ -105,6 +106,7 @@ class FSRIngestionView(generics.CreateAPIView):
         event.weight_grams = data["weight_grams"]
         event.save()
 
+        event.refresh_from_db()
         resolved = try_resolve_event(event)
 
         return Response(
