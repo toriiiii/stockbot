@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   filterChipTextActiveBlue: { color: "#0077bbff" },
   itemName: { fontSize: 14, fontWeight: "bold", textAlign: "center" },
   itemButtonText: { fontSize: 18, fontWeight: "bold" },
-  fab: { position: "absolute", bottom: 30, right: 30, backgroundColor: "#afe3b0ff", width: 60, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center" },
+  fab: { position: "absolute", bottom: 30, right: 30, backgroundColor: "#5aab5e", width: 60, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center" },
   fabText: { color: "#fff", fontSize: 32, fontWeight: "bold", lineHeight: 60, textAlign: "center" },
   input: { width: "80%", height: 50, borderColor: "#ccc", borderWidth: 1, borderRadius: 8, padding: 10, marginBottom: 15 },
   button: { padding: 15, borderRadius: 8, marginTop: 10 },
