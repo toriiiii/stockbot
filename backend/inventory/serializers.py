@@ -36,5 +36,5 @@ class ClassificationIngestionSerializer(serializers.Serializer):
 class FSRIngestionSerializer(serializers.Serializer):
     bot_id = serializers.IntegerField()
     image_id = serializers.CharField(max_length=255)
-    weight_grams = serializers.IntegerField()
+    weight_grams = serializers.FloatField()
 

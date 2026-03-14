@@ -9,8 +9,8 @@ class Item(models.Model):
         related_name='kitchen_items'
     )
     name = models.CharField(max_length=100)
-    initial_grams = models.DecimalField(max_digits=10, decimal_places=2)
-    current_grams = models.DecimalField(max_digits=10, decimal_places=2)
+    initial_grams = models.FloatField()
+    current_grams = models.FloatField()
     expires_at = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -30,7 +30,7 @@ class SensorIngestionEvent(models.Model):
     # Partial data (nullable)
     image = models.ImageField(upload_to="fridge_images/", null=True, blank=True)
     classification = models.CharField(max_length=100, null=True, blank=True)
-    weight_grams = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    weight_grams = models.FloatField(null=True, blank=True)
     expires_at = models.DateField(null=True, blank=True)
 
     # Resolution
