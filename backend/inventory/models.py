@@ -14,6 +14,18 @@ class Item(models.Model):
     expires_at = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Tracks whether a logged item has been removed from the fridge
+    # Items removed for longer than 5hrs will be considered consumed
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("in_fridge"),
+            ("removed"),
+        ],
+        default="in_fridge"
+    )
+    last_removed_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f"{self.name}"
 
