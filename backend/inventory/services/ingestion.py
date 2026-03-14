@@ -39,7 +39,7 @@ def add_return_item(event):
     
     candidates = Item.objects.filter(
         user = event.user,
-        classification = event.classification,
+        name = event.classification,
         status = "removed",
     )
     if not candidates.exists():
@@ -58,7 +58,7 @@ def remove_item(event):
     
     candidates = Item.objects.filter(
         user = event.user,
-        classification = event.classification,
+        name = event.classification,
         status = "in_fridge",
     )
     if not candidates.exists():
