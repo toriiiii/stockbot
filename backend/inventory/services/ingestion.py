@@ -28,6 +28,7 @@ def try_resolve_event(event):
         remove_item(event)
 
     event.delete()
+    logger.info(f'Resolved sensor ingestion event — user={event.user} image_id={event.image_id}')
     return True
 
 # ADD or RETURN item
