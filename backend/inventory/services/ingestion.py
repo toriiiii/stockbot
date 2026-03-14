@@ -2,7 +2,12 @@ from inventory.models import Item
 from django.db import transaction
 from django.utils import timezone
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 UNKNOWN_CLASS = "unknown"
+TOLERANCE = 40
 
 @transaction.atomic
 def try_resolve_event(event):
@@ -47,7 +52,7 @@ def add_return_item(event):
 # REMOVE item
 def remove_item(event):
     if event.classification == UNKNOWN_CLASS:
-        # TO DO: notify user
+        logger.error(f'Unknown item has been removed')
         return
     
     candidates = Item.objects.filter(
@@ -56,7 +61,7 @@ def remove_item(event):
         status = "in_fridge",
     )
     if not candidates.exists():
-        # TO DO: notify user
+        logger.error(f'Removed item does not exist')
         return
     
     best_match = match_item(event, candidates, mode="remove")
@@ -72,18 +77,22 @@ def create_new_item(event):
         current_grams=event.weight_grams,
         expires_at=event.expires_at,
     )
+    logger.info(f'Item has been created')
     return
 
 def mark_as_removed(event, instance: Item):
     instance.status = "removed"
     instance.last_removed_at = timezone.now()
     instance.save()
+    logger.info(f'Item has been removed')
     return
 
 def mark_as_returned(event, instance: Item):
     instance.status = "in_fridge"
     instance.current_grams = event.weight_grams
+    logger.info(f'Item has been returned')
     instance.save()
+    return
 
 # Matching algorithm
 def match_item(event, candidates, mode):
