@@ -19,8 +19,8 @@ class Item(models.Model):
     status = models.CharField(
         max_length=20,
         choices=[
-            ("in_fridge"),
-            ("removed"),
+            ("in_fridge", "In Fridge"),
+            ("removed", "Removed"),
         ],
         default="in_fridge"
     )
