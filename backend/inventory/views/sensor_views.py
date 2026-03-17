@@ -6,6 +6,9 @@ from inventory.models import SensorIngestionEvent
 from ..serializers import CameraIngestionSerializer, ClassificationIngestionSerializer, FSRIngestionSerializer
 from inventory.services.ingestion import try_resolve_event
 
+import logging
+
+logger = logging.getLogger(__name__)
 class CameraIngestionView(generics.CreateAPIView):
     serializer_class = CameraIngestionSerializer
     permission_classes = [permissions.AllowAny]
@@ -18,6 +21,7 @@ class CameraIngestionView(generics.CreateAPIView):
         try:
             user = StockBotUser.objects.get(botID=data["bot_id"])
         except StockBotUser.DoesNotExist:
+            logger.error(f'Camera update failed — bot id user not found')
             return Response(
                 {"error": "Invalid bot_id"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -33,6 +37,8 @@ class CameraIngestionView(generics.CreateAPIView):
             event.save()
 
         resolved = try_resolve_event(event)
+        if resolved:
+            logger.info(f'Sensor ingestion event resolved')
 
         return Response(
             {
@@ -52,9 +58,13 @@ class ClassificationIngestionView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         data = serializer.validated_data
+
+        logger.info(f'Classification data received — bot_id={data["bot_id"]} image_id={data["image_id"]}')
+
         try:
             user = StockBotUser.objects.get(botID=data["bot_id"])
         except StockBotUser.DoesNotExist:
+            logger.error(f'Camera update failed — bot id user not found')
             return Response(
                 {"error": "Invalid bot_id"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -71,6 +81,8 @@ class ClassificationIngestionView(generics.CreateAPIView):
 
         event.refresh_from_db()
         resolved = try_resolve_event(event)
+
+        logger.info(f'Classification data processed — bot_id={data["bot_id"]} image_id={data["image_id"]}')
 
         return Response(
             {
@@ -90,9 +102,13 @@ class FSRIngestionView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         data = serializer.validated_data
+
+        logger.info(f'FSR data received — bot_id={data["bot_id"]} image_id={data["image_id"]}')
+
         try:
             user = StockBotUser.objects.get(botID=data["bot_id"])
         except StockBotUser.DoesNotExist:
+            logger.error(f'Camera update failed — bot id user not found')
             return Response(
                 {"error": "Invalid bot_id"},
                 status=status.HTTP_400_BAD_REQUEST
@@ -108,6 +124,8 @@ class FSRIngestionView(generics.CreateAPIView):
 
         event.refresh_from_db()
         resolved = try_resolve_event(event)
+
+        logger.info(f'FSR data processed — bot_id={data["bot_id"]} image_id={data["image_id"]}')
 
         return Response(
             {

@@ -30,11 +30,11 @@ class ClassificationIngestionSerializer(serializers.Serializer):
     bot_id = serializers.IntegerField()
     image_id = serializers.CharField(max_length=255)
     classification = serializers.CharField(max_length=255)
-    expires_at = serializers.DateField(format="%Y-%m-%d", input_formats=["%Y-%m-%d"], allow_null=True)
+    expires_at = serializers.DateField(format="%Y-%m-%d", input_formats=["%Y-%m-%d"], allow_null=True, required=False)
 
 # Force Sensor (FSR) Ingestion
 class FSRIngestionSerializer(serializers.Serializer):
     bot_id = serializers.IntegerField()
     image_id = serializers.CharField(max_length=255)
-    weight_grams = serializers.IntegerField()
+    weight_grams = serializers.FloatField()
 
