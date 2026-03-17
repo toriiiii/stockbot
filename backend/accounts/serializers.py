@@ -17,6 +17,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Passwords do not match.")
         return attrs
 
+    def validate_botID(self, value):
+        if User.objects.filter(botID=value).exists():
+            raise serializers.ValidationError("That Bot ID is already registered to another account.")
+        return value
+
     def create(self, validated_data):
         validated_data.pop("password2")
         return User.objects.create_user(**validated_data)

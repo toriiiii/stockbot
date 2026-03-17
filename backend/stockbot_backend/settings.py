@@ -14,6 +14,7 @@ from pathlib import Path
 import dj_database_url
 import os
 import sys
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -55,6 +56,11 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ]
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=100), # Dev config
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=100),
 }
 
 MIDDLEWARE = [
