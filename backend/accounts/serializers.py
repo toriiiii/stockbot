@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
+from .models import DeviceToken
 
 User = get_user_model()
 
@@ -26,8 +27,20 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop("password2")
         return User.objects.create_user(**validated_data)
 
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "email", "botID")
+
+class DeviceTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeviceToken
+        fields = (
+            'id',
+            'user',
+            'token',
+            'platform',
+            'created_at',
+            'updated_at',
+        )
+        read_only_fields = ('user', 'created_at', 'updated_at')
