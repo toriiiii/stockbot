@@ -1,11 +1,15 @@
 services:
   - type: web
     name: django-api
-    env: python
-    buildCommand: pip install -r backend/requirements.txt
+    runtime: python
+    rootDir: backend       
+    buildCommand: pip install -r requirements.txt && python manage.py migrate
     startCommand: gunicorn stockbot_backend.wsgi:application
-    envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: backend.settings
-      - key: PYTHON_VERSION
-        value: 3.11.7
+
+  - type: cron
+    name: daily-expiry-check
+    runtime: python
+    rootDir: backend        
+    buildCommand: pip install -r requirements.txt
+    schedule: "0 8 * * *"
+    startCommand: python manage.py check_expiring_items
