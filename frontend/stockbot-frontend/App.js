@@ -233,7 +233,7 @@ function InventoryScreen({ navigation, onLogout }) {
     return (
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (!filterLowStock || (percent !== null && percent <= 25)) &&
-      (!filterExpiringSoon || (daysUntilExpiry !== null && daysUntilExpiry <= 5))
+      (!filterExpiringSoon || (daysUntilExpiry !== null && daysUntilExpiry <= 7))
     );
   });
 
@@ -242,7 +242,7 @@ function InventoryScreen({ navigation, onLogout }) {
     const percent = hasStock ? Math.round((Number(item.current_grams) / Number(item.initial_grams)) * 100) : null;
     const isLowStock = hasStock && percent <= 25;
     const daysUntilExpiry = item.expires_at ? Math.ceil((new Date(item.expires_at) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-    const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 5;
+    const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 7;
     return (
       <TouchableOpacity onPress={() => navigation.navigate("ItemView", { item })}>
         <View style={[styles.itemContainer, { marginBottom: 20 }]}>
@@ -387,7 +387,7 @@ function ItemViewScreen({ route, navigation, addToGrocery, onLogout }) {
   const percent = hasStock ? Math.round((Number(item.current_grams) / Number(item.initial_grams)) * 100) : null;
   const isLowStock = hasStock && percent <= 25;
   const daysUntilExpiry = item.expires_at ? Math.ceil((new Date(item.expires_at) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-  const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 5;
+  const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 7;
 
   const deleteItem = () => {
     Alert.alert("Delete Item", `Are you sure you want to delete ${item.name}?`, [
