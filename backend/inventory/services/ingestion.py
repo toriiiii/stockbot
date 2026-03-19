@@ -32,6 +32,8 @@ def try_resolve_event(event):
     else:
         remove_item(event)
 
+    event.image = None # clear reference to preserve file
+    event.save()
     event.delete()
     logger.info(f'Resolved sensor ingestion event — user={event.user} image_id={event.image_id}')
     return True
@@ -102,13 +104,15 @@ def remove_item(event):
 
 # Resolutions
 def create_new_item(event):
-    Item.objects.create(
+    item = Item(
         user=event.user,
         name=event.classification,
         initial_grams=event.weight_grams,
         current_grams=event.weight_grams,
         expires_at=event.expires_at,
     )
+    item.image.name = event.image.name if event.image else None
+    item.save()
     logger.info(f'Item has been created')
     return
 
