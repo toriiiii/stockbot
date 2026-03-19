@@ -13,7 +13,7 @@ TOLERANCE = 40
 LOW_STOCK_THRESHOLD = 25 # percentage of initial weight
 
 @transaction.atomic
-def try_resolve_event(event, image=None):
+def try_resolve_event(event):
     """
     If an ingestion event has all required data,
     determine whether the item is being ADDED, REMOVED, or RETURNED
@@ -26,18 +26,20 @@ def try_resolve_event(event, image=None):
     
     # Item is being ADDED or RETURNED
     if event.weight_grams > 0:
-        add_return_item(event, image=image)
+        add_return_item(event)
     else:
         remove_item(event)
 
+    event.image = None # clear reference to preserve file
+    event.save()
     event.delete()
     logger.info(f'Resolved sensor ingestion event — user={event.user} image_id={event.image_id}')
     return True
 
 # ADD or RETURN item
-def add_return_item(event, image=None):
+def add_return_item(event):
     if event.classification == UNKNOWN_CLASS:
-        create_new_item(event, image=image)
+        create_new_item(event)
         return
     
     candidates = Item.objects.filter(
@@ -46,7 +48,7 @@ def add_return_item(event, image=None):
         status = "removed",
     )
     if not candidates.exists():
-        create_new_item(event, image=image)
+        create_new_item(event)
         return
     
     best_match = match_item(event, candidates, mode="return")
@@ -90,15 +92,16 @@ def remove_item(event):
     return
 
 # Resolutions
-def create_new_item(event, image=None):
-    Item.objects.create(
+def create_new_item(event):
+    item = Item(
         user=event.user,
         name=event.classification,
         initial_grams=event.weight_grams,
         current_grams=event.weight_grams,
         expires_at=event.expires_at,
-        image=image,
     )
+    item.image.name = event.image.name if event.image else None
+    item.save()
     logger.info(f'Item has been created')
     return
 

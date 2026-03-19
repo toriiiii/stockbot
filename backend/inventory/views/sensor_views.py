@@ -38,13 +38,12 @@ class ClassificationIngestionView(generics.CreateAPIView):
 
         event.classification = data["classification"]
         event.expires_at = data.get("expires_at")
+        if "image" in data:
+            event.image = data["image"]
         event.save()
 
-        event.refresh_from_db() 
-        image_file = data.get("image") 
-
         event.refresh_from_db()
-        resolved = try_resolve_event(event,image=image_file)
+        resolved = try_resolve_event(event)
 
         logger.info(f'Classification data processed — bot_id={data["bot_id"]} image_id={data["image_id"]}')
 
