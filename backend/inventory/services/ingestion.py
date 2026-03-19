@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 UNKNOWN_CLASS = "unknown"
 TOLERANCE = 40
 LOW_STOCK_THRESHOLD = 25 # percentage of initial weight
+LOW_STOCK_NOTIF = "low_stock"
+REMOVAL_ERROR_NOTIF = "unknown_removed"
 
 @transaction.atomic
 def try_resolve_event(event):
@@ -34,6 +36,24 @@ def try_resolve_event(event):
     logger.info(f'Resolved sensor ingestion event — user={event.user} image_id={event.image_id}')
     return True
 
+# Push notifications
+def send_notif(type, item):
+    tokens = list(
+        DeviceToken.objects.filter(user=item.user).values_list('token', flat=True)
+    )
+    if type == LOW_STOCK_NOTIF:
+        send_push_notification(
+            tokens=tokens,
+            title='📦 Low stock alert',
+            body=f'{item.name} is running low.',
+        )
+    elif type == REMOVAL_ERROR_NOTIF:
+        send_push_notification(
+            tokens=tokens,
+            title='Unknown Item Removed',
+            body=f'An item has been removed that could not be classified or was not recorded before',
+        )
+
 # ADD or RETURN item
 def add_return_item(event):
     if event.classification == UNKNOWN_CLASS:
@@ -55,18 +75,7 @@ def add_return_item(event):
     # send low stock notif if needed
     if (event.weight_grams / best_match.initial_weight) * 100 < LOW_STOCK_THRESHOLD:
         logger.info('Returned item is low stock')
-        tokens = list(
-            DeviceToken.objects.filter(user=best_match.user).values_list('token', flat=True)
-        )
-        send_push_notification(
-            tokens=tokens,
-            title='📦 Low stock alert',
-            body=f'{best_match.name} is running low — only {event.weight_grams:.0f}g remaining.',
-            data={
-                'type': 'low_stock',
-                'item_id': str(best_match.id),
-            },
-        )
+        send_notif(LOW_STOCK_NOTIF, event)
 
     return
 
@@ -74,6 +83,7 @@ def add_return_item(event):
 def remove_item(event):
     if event.classification == UNKNOWN_CLASS:
         logger.error(f'Unknown item has been removed')
+        send_notif(REMOVAL_ERROR_NOTIF, event)
         return
     
     candidates = Item.objects.filter(
@@ -83,6 +93,7 @@ def remove_item(event):
     )
     if not candidates.exists():
         logger.error(f'Removed item does not exist')
+        send_notif(REMOVAL_ERROR_NOTIF, event)
         return
     
     best_match = match_item(event, candidates, mode="remove")
