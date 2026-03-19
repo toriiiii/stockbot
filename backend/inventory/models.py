@@ -13,6 +13,7 @@ class Item(models.Model):
     current_grams = models.FloatField()
     expires_at = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to="item_images/", null=True, blank=True) 
 
     # Notification flags - prevent repeat notifs
     notified_expiring_soon = models.BooleanField(default=False)  # 7 days
@@ -45,7 +46,6 @@ class SensorIngestionEvent(models.Model):
     image_id = models.CharField(max_length=128)
 
     # Partial data (nullable)
-    image = models.ImageField(upload_to="fridge_images/", null=True, blank=True)
     classification = models.CharField(max_length=100, null=True, blank=True)
     weight_grams = models.FloatField(null=True, blank=True)
     expires_at = models.DateField(null=True, blank=True)

@@ -13,7 +13,7 @@ TOLERANCE = 40
 LOW_STOCK_THRESHOLD = 25 # percentage of initial weight
 
 @transaction.atomic
-def try_resolve_event(event):
+def try_resolve_event(event, image=None):
     """
     If an ingestion event has all required data,
     determine whether the item is being ADDED, REMOVED, or RETURNED
@@ -26,7 +26,7 @@ def try_resolve_event(event):
     
     # Item is being ADDED or RETURNED
     if event.weight_grams > 0:
-        add_return_item(event)
+        add_return_item(event, image=image)
     else:
         remove_item(event)
 
@@ -35,9 +35,9 @@ def try_resolve_event(event):
     return True
 
 # ADD or RETURN item
-def add_return_item(event):
+def add_return_item(event, image=None):
     if event.classification == UNKNOWN_CLASS:
-        create_new_item(event)
+        create_new_item(event, image=image)
         return
     
     candidates = Item.objects.filter(
@@ -46,7 +46,7 @@ def add_return_item(event):
         status = "removed",
     )
     if not candidates.exists():
-        create_new_item(event)
+        create_new_item(event, image=image)
         return
     
     best_match = match_item(event, candidates, mode="return")
@@ -90,13 +90,14 @@ def remove_item(event):
     return
 
 # Resolutions
-def create_new_item(event):
+def create_new_item(event, image=None):
     Item.objects.create(
         user=event.user,
         name=event.classification,
         initial_grams=event.weight_grams,
         current_grams=event.weight_grams,
         expires_at=event.expires_at,
+        image=image,
     )
     logger.info(f'Item has been created')
     return

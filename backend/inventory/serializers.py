@@ -16,19 +16,15 @@ class ItemSerializer(serializers.ModelSerializer):
             "current_grams",
             "expires_at",
             "created_at",
+            "image",
         )
         read_only_fields = ("user", "created_at")
-
-# Camera Ingestion (currently unused, for future image upload)
-class CameraIngestionSerializer(serializers.Serializer):
-    bot_id = serializers.IntegerField()
-    image_id = serializers.CharField(max_length=255)
-    image = serializers.ImageField(required=False)
 
 # AI Server Ingestion
 class ClassificationIngestionSerializer(serializers.Serializer):
     bot_id = serializers.IntegerField()
     image_id = serializers.CharField(max_length=255)
+    image = serializers.ImageField(required=False)
     classification = serializers.CharField(max_length=255)
     expires_at = serializers.DateField(format="%Y-%m-%d", input_formats=["%Y-%m-%d"], allow_null=True, required=False)
 
