@@ -5,6 +5,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { registerForPushNotifications, useNotificationListeners } from './notifications';
+
 
 const numColumns = 3;
 const blockSize = Dimensions.get("window").width / numColumns - 20;
@@ -101,6 +103,7 @@ function LoginScreen({ navigation, onLogin }) {
       }
       const { access, refresh } = await res.json();
       await saveToken(access, refresh);
+      await registerForPushNotifications();
       onLogin(access);
     } catch (e) {
       Alert.alert("Login Failed", e.message);
@@ -163,6 +166,7 @@ function SignupScreen({ navigation, onLogin }) {
       });
       const { access, refresh } = await loginRes.json();
       await saveToken(access, refresh);
+      await registerForPushNotifications(); 
       onLogin(access);
     } catch (e) {
       Alert.alert("Signup Failed", e.message);
@@ -200,6 +204,8 @@ function SignupScreen({ navigation, onLogin }) {
 
 // ─── Inventory Screens ────────────────────────────────────────────────────────
 function InventoryScreen({ navigation, onLogout }) {
+  useNotificationListeners(navigation);
+
   const [pantryItems, setPantryItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
