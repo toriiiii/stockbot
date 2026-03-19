@@ -1,6 +1,8 @@
 from inventory.models import Item
 from django.db import transaction
 from django.utils import timezone
+from inventory.notifications import send_push_notification
+from accounts.models import DeviceToken
 
 import logging
 
@@ -8,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 UNKNOWN_CLASS = "unknown"
 TOLERANCE = 40
+LOW_STOCK_THRESHOLD = 25 # percentage of initial weight
 
 @transaction.atomic
 def try_resolve_event(event):
@@ -48,6 +51,23 @@ def add_return_item(event):
     
     best_match = match_item(event, candidates, mode="return")
     mark_as_returned(event, best_match)
+
+    # send low stock notif if needed
+    if (event.weight_grams / best_match.initial_weight) * 100 < LOW_STOCK_THRESHOLD:
+        logger.info('Returned item is low stock')
+        tokens = list(
+            DeviceToken.objects.filter(user=best_match.user).values_list('token', flat=True)
+        )
+        send_push_notification(
+            tokens=tokens,
+            title='📦 Low stock alert',
+            body=f'{best_match.name} is running low — only {event.weight_grams:.0f}g remaining.',
+            data={
+                'type': 'low_stock',
+                'item_id': str(best_match.id),
+            },
+        )
+
     return
 
 # REMOVE item

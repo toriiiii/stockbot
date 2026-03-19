@@ -14,6 +14,11 @@ class Item(models.Model):
     expires_at = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Notification flags - prevent repeat notifs
+    notified_expiring_soon = models.BooleanField(default=False)  # 7 days
+    notified_expiry_day = models.BooleanField(default=False)    # today
+    notified_low_stock = models.BooleanField(default=False)    # < 10% of initial weight
+
     # Tracks whether a logged item has been removed from the fridge
     # Items removed for longer than 5hrs will be considered consumed
     status = models.CharField(
