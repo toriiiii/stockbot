@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
 const API_BASE = 'https://stockbot-api-yu48.onrender.com';
 
@@ -51,7 +52,7 @@ export async function registerForPushNotifications() {
   // Get the Expo push token
   // Find your projectId at expo.dev under your project settings
   const tokenData = await Notifications.getExpoPushTokenAsync({
-    projectId: 'your-expo-project-id',  // ← replace with your actual project ID
+    projectId: Constants.expoConfig.extra.eas.projectId,
   });
 
   console.log('Expo push token:', tokenData.data);

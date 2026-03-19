@@ -25,6 +25,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "88104575-931a-42b4-ac8b-7b7acfdb105c"
+      }
+    },
+    "owner": "toriiiii"
   }
 }
