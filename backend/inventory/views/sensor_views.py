@@ -1,5 +1,6 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from accounts.models import StockBotUser
 from inventory.models import SensorIngestionEvent
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 class ClassificationIngestionView(generics.CreateAPIView):
     serializer_class = ClassificationIngestionSerializer
     permission_classes = [permissions.AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
