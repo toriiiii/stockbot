@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { registerForPushNotifications, useNotificationListeners } from './notifications';
+import { Image } from 'react-native'; 
 
 
 const numColumns = 3;
@@ -246,7 +247,10 @@ function InventoryScreen({ navigation, onLogout }) {
     return (
       <TouchableOpacity onPress={() => navigation.navigate("ItemView", { item })}>
         <View style={[styles.itemContainer, { marginBottom: 20 }]}>
-          <View style={styles.itemBox} />
+          {item.image
+            ? <Image source={{ uri: item.image }} style={[styles.itemBox, { borderRadius: 10 }]} />
+            : <View style={styles.itemBox} />
+          }
           <Text style={styles.itemName}>{item.name}</Text>
           {isLowStock && <View style={styles.lowStockBadge}><Text style={styles.lowStockText}>Low Stock</Text></View>}
           {isExpiringSoon && <View style={[styles.lowStockBadge, { backgroundColor: "#d0ebfbff" }]}><Text style={[styles.lowStockText, { color: "#0077bbff" }]}>Expires Soon</Text></View>}
@@ -413,7 +417,12 @@ function ItemViewScreen({ route, navigation, addToGrocery, onLogout }) {
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
-      <View style={styles.itemCircle} />
+
+      {item.image
+        ? <Image source={{ uri: item.image }} style={[styles.itemCircle, { borderRadius: circleSize / 2 }]} />
+        : <View style={styles.itemCircle} />
+      }
+
       <Text style={styles.itemTitle}>{item.name}</Text>
       {(isLowStock || isExpiringSoon) && (
         <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>

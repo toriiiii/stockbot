@@ -22,8 +22,11 @@ def try_resolve_event(event):
     and update the database accordingly.
     """
 
+    logger.info("Trying to resolve event")
+
     # Ingestion event does not have all required data
     if not event.classification or event.weight_grams is None:
+        logger.info("Event incomplete - not resolved")
         return False
     
     # Item is being ADDED or RETURNED

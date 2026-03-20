@@ -6,6 +6,7 @@ from .services.ingestion import try_resolve_event
 User = get_user_model()
 
 class ItemSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Item
         fields = (
