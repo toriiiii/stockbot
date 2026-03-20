@@ -78,7 +78,7 @@ def add_return_item(event):
     mark_as_returned(event, best_match)
 
     # send low stock notif if needed
-    if (event.weight_grams / best_match.initial_weight) * 100 < LOW_STOCK_THRESHOLD:
+    if (event.weight_grams / best_match.initial_grams) * 100 < LOW_STOCK_THRESHOLD:
         logger.info('Returned item is low stock')
         send_notif(LOW_STOCK_NOTIF, event)
 
