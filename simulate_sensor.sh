@@ -1,0 +1,1 @@
+curl --ssl-no-revoke -X POST https://stockbot-api-yu48.onrender.com/api/inventory/ingestion/fsr/ -H "Content-Type: application/json" -d "{\"bot_id\": 0, \"image_id\": \"grocery_12246_4CC382A87960.jpg\", \"weight_grams\": 500}"
