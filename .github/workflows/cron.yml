@@ -1,0 +1,39 @@
+name: Scheduled cron jobs
+
+on:
+  schedule:
+    # Expiry check — every day at 8:00am EST (13:00 UTC)
+    - cron: '0 13 * * *'
+
+    # Cleanup check — every hour
+    - cron: '0 * * * *'
+
+  # Lets you trigger either job manually from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  check-expiring-items:
+    name: Expiry notifications
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 8 * * *'
+
+    steps:
+      - name: Call expiry check endpoint
+        run: |
+          curl --fail -X POST \
+            https://stockbot-api-yu48.onrender.com/api/inventory/management/check-expiring-items/ \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
+
+  remove-absent-items:
+    name: Remove absent items
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 * * * *'
+
+    steps:
+      - name: Call cleanup endpoint
+        run: |
+          curl --fail -X POST \
+            https://stockbot-api-yu48.onrender.com/api/inventory/management/remove-absent-items/ \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
