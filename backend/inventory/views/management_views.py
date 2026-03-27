@@ -7,8 +7,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from accounts.models import DeviceToken
-from .models import Item
-from .notifications import send_push_notification
+from inventory.models import Item
+from inventory.notifications import send_push_notification
 
 CRON_SECRET = os.environ.get('CRON_SECRET', '')
 
