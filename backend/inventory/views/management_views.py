@@ -109,7 +109,7 @@ def cron_remove_absent_items(request):
     # Items that left the fridge and haven't returned within 24 hours
     absent_items = Item.objects.filter(
         status='removed',
-        last_removed__lt=cutoff,
+        last_removed_at__lt=cutoff,
     )
 
     count = absent_items.count()
